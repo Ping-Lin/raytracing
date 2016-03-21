@@ -4,7 +4,8 @@ all: $(EXEC)
 
 CC ?= gcc
 CFLAGS = \
-	-std=gnu99 -Wall -O0 -g -msse3
+	-pthread -std=gnu99 -Wall -O0 -g -msse3 \
+	-D__forceinline="__attribute__((always_inline))"
 LDFLAGS = \
 	-lm
 
@@ -24,7 +25,7 @@ OBJS := \
 
 
 $(EXEC): $(OBJS)
-	$(CC) -o $@ $^ $(LDFLAGS)
+	$(CC) -o $@ $^ $(LDFLAGS) $(CFLAGS)
 
 main.o: use-models.h
 use-models.h: models.inc Makefile

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <time.h>
+#include <pthread.h>
 
 #include "primitives.h"
 #include "raytracing.h"
@@ -33,35 +34,72 @@ static double diff_in_second(struct timespec t1, struct timespec t2)
 
 int main()
 {
-    uint8_t *pixels;
+	int threadNum = 1;
+	RayInfo *rayInfo = malloc(sizeof(RayInfo));
+	pthread_t *threadIndex = malloc(sizeof(pthread_t) * threadNum);
+
     light_node lights = NULL;
     rectangular_node rectangulars = NULL;
     sphere_node spheres = NULL;
     color background = { 0.0, 0.1, 0.1 };
+
     struct timespec start, end;
 
 #include "use-models.h"
+    rayInfo->lights = lights;
+    rayInfo->rectangulars = rectangulars;
+    rayInfo->spheres = spheres;
+    rayInfo->background[0] = background[0];
+    rayInfo->background[1] = background[1];
+    rayInfo->background[2] = background[2];
+    rayInfo->view = &view;
+    rayInfo->width = ROWS;
+    rayInfo->height = COLS;
+
 
     /* allocate by the given resolution */
-    pixels = malloc(sizeof(unsigned char) * ROWS * COLS * 3);
-    if (!pixels) exit(-1);
+    rayInfo->pixels = malloc(sizeof(unsigned char) * ROWS * COLS * 3);
+    if (!rayInfo->pixels) exit(-1);
 
     printf("# Rendering scene\n");
     /* do the ray tracing with the given geometry */
     clock_gettime(CLOCK_REALTIME, &start);
-    raytracing(pixels, background,
-               rectangulars, spheres, lights, &view, ROWS, COLS);
-    clock_gettime(CLOCK_REALTIME, &end);
+
+	rayInfo->threadNum = threadNum;
+	for(int i = 0; i < threadNum; i++) {
+		rayInfo->threadIndex = i;
+		int err = pthread_create(&threadIndex[i], 0, raytracing, (void*)rayInfo);
+		if(err) {
+			printf("create thread error.\n");
+			return -1;
+		}
+
+		//raytracing(pixels, background, rectangulars, spheres, lights, &view, ROWS, COLS, 2, 0);
+		//raytracing(pixels, background, rectangulars, spheres, lights, &view, ROWS, COLS, 2, 1);
+    }
+
+	for(int i = 0; i < threadNum; i++) {
+		void *returnVal;
+		int err = pthread_join(threadIndex[i], &returnVal);
+		if(err) {
+			printf("join thread error.\n");
+			return -1;
+		}
+	}
+
+
+	clock_gettime(CLOCK_REALTIME, &end);
     {
         FILE *outfile = fopen(OUT_FILENAME, "wb");
-        write_to_ppm(outfile, pixels, ROWS, COLS);
+        write_to_ppm(outfile, rayInfo->pixels, ROWS, COLS);
         fclose(outfile);
     }
 
-    delete_rectangular_list(&rectangulars);
-    delete_sphere_list(&spheres);
-    delete_light_list(&lights);
-    free(pixels);
+    delete_rectangular_list(&rayInfo->rectangulars);
+    delete_sphere_list(&rayInfo->spheres);
+    delete_light_list(&rayInfo->lights);
+    free(rayInfo->pixels);
+	free(rayInfo);
     printf("Done!\n");
     printf("Execution time of raytracing() : %lf sec\n", diff_in_second(start, end));
     return 0;
