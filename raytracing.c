@@ -459,8 +459,8 @@ static unsigned int ray_color(const point3 e, double t,
                 int width, int height, int threadNum, int threadIndex)*/
 void* raytracing(void *arg)
 {
-	RayInfo *rayInfo = (RayInfo *)arg;
-	printf("index: %d", rayInfo->threadIndex);
+    RayInfo *rayInfo = (RayInfo *)arg;
+    //printf("index: %d", rayInfo->threadIndex);
 
     point3 u, v, w, d;
     color object_color = { 0.0, 0.0, 0.0 };
@@ -499,5 +499,5 @@ void* raytracing(void *arg)
             }
         }
     }
-	return NULL;
+    return NULL;
 }

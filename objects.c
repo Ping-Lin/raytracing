@@ -28,23 +28,24 @@
 
 // *INDENT-OFF*
 FUNC_BEGIN(light)
-    COPY_POINT3(newNode->element.position, X->position);
-    COPY_COLOR(newNode->element.light_color, X->light_color);
-    newNode->element.intensity = X->intensity;
+COPY_POINT3(newNode->element.position, X->position);
+COPY_COLOR(newNode->element.light_color, X->light_color);
+newNode->element.intensity = X->intensity;
 FUNC_END(light)
 
 FUNC_BEGIN(rectangular)
-    COPY_OBJECT_FILL(newNode->element.rectangular_fill, X->rectangular_fill);
-    for (int i = 0; i < 4; i++) {
-        COPY_POINT3(newNode->element.vertices[i], X->vertices[i]);
-        COPY_POINT3(newNode->element.normal, X->normal);
-    }
+COPY_OBJECT_FILL(newNode->element.rectangular_fill, X->rectangular_fill);
+for (int i = 0; i < 4; i++)
+{
+    COPY_POINT3(newNode->element.vertices[i], X->vertices[i]);
+    COPY_POINT3(newNode->element.normal, X->normal);
+}
 FUNC_END(rectangular)
 
 FUNC_BEGIN(sphere)
-    COPY_OBJECT_FILL(newNode->element.sphere_fill, X->sphere_fill);
-    newNode->element.radius = X->radius;
-    COPY_POINT3(newNode->element.center, X->center);
-    FUNC_END(sphere)
+COPY_OBJECT_FILL(newNode->element.sphere_fill, X->sphere_fill);
+newNode->element.radius = X->radius;
+COPY_POINT3(newNode->element.center, X->center);
+FUNC_END(sphere)
 
 // *INDENT-ON*
