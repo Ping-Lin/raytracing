@@ -4,14 +4,14 @@ all: $(EXEC)
 
 CC ?= gcc
 CFLAGS = \
-	-std=gnu99 -Wall -O0 -g
+	-std=gnu99 -Wall -O0 -g -msse3
 LDFLAGS = \
 	-lm
 
 ifeq ($(strip $(PROFILE)),1)
 PROF_FLAGS = -pg
 CFLAGS += $(PROF_FLAGS)
-LDFLAGS += $(PROF_FLAGS) 
+LDFLAGS += $(PROF_FLAGS)
 endif
 
 OBJS := \
